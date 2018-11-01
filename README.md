@@ -18,3 +18,19 @@ Features Implemented: (Open the Mounted Directory - "test" in Terminal and execu
 2. Use "ls ?" to list all files created.
 3. Searching using "ls ?" command (example: ls '?unit1:change1'). You can also list all files by simply specifying "ls ?" (performs similar to "ls")
 4. Replace spec for a file using "mv" command (example: mv 'unit1:change1,unit2:change2,unit3:change3' '<unit5:change5')
+
+To Test Performance:
+
+Uncomment the code from 237 to 255 FlatFs.cpp and then compile and run flatfs then open the mounted directory in terminal
+
+Run the below code to measure create performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" touch 'a:b'
+
+Run the below code to measure read performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls ?
+
+Run the below code to measure update performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" mv 'a:b' '<c:d'
