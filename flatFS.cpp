@@ -234,7 +234,7 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 	strncpy(files[file_counter], fileName , 24);
 	file_counter++;
 
-	/*if(file10000 <= 5000)
+	if(file10000 <= 4999)
 	{
 			file10000++;
 			char test[24];
@@ -252,7 +252,7 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 			std::cout << "\n" << fileCreate << "\n";
 
 			do_create(fileCreate,mode,fi);
-	}*/
+	}
 
 	if(isFileFromCreate == 0) //check if it is a file create
 		isFileFromCreate = 1;
@@ -422,7 +422,7 @@ std::cout << "syantax error";
 				{
 					fileNumsForMove[fileNumsForMoveCount][kk] = NULL;
 				}
-				if(fileRename10000 <= 9999)
+				if(fileRename10000 <= 4999)
 				{std::cout<< "inn";
 					fileRename10000++;
 					char test[24];
