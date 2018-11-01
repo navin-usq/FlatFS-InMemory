@@ -26,13 +26,3 @@ Run the below code to measure update performance:
 
 /usr/bin/time -f "\n\nProcess Time : %e\n" mv 'a:b' '<c:d'
 
-To test these features you should comment below performance code
-
-comment the code from 237 to 255 and 425 to 445 in FlatFs.cpp and then compile and run flatfs then open the mounted directory in terminal
-
-Features Implemented: (Open the Mounted Directory - "test" in Terminal and execute the commands)
-
-1. Creating files using "touch" command (example: touch 'unit1:change1,unit2:change2')
-2. Use "ls ?" to list all files created.
-3. Searching using "ls ?" command (example: ls '?unit1:change1'). You can also list all files by simply specifying "ls ?" (performs similar to "ls")
-4. Replace spec for a file using "mv" command (example: mv 'unit1:change1,unit2:change2,unit3:change3' '<unit5:change5')
