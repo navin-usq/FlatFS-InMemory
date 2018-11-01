@@ -439,7 +439,6 @@ std::cout << "syantax error";
 					fileCreate[re] = NULL;
 
 					std::cout << "\n" << fileWithNames[fileRename10000] << " " << fileCreate << "\n";
-					fileRename10000++;
 	
 					do_rename(fileWithNames[fileRename10000],fileCreate);
 				}
