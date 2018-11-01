@@ -12,8 +12,6 @@ command to run FlatFS: ./flatFS -f test (create a directory named test to mount 
 
 NOTE: Please ignore errors shown in the Mounted directory(test) while executing commands (Example: while executing touch command it may show some error but it is from the HFS - just ignore it). Only consider error log in terminal where you run the FlatFS. This terminal will also show some log info.
 
-At the start, program will ask for the database location. Please give the location with database name (sql.db). Please allow read and write permissions for the database location path. Database location must be specified from the root.(database location example: /home/navin/Desktop/sql.db)
-
 Features Implemented: (Open the Mounted Directory - "test" in Terminal and execute the commands)
 
 1. Creating files using "touch" command (example: touch 'unit1:change1,unit2:change2')
