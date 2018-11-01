@@ -12,7 +12,7 @@ command to run FlatFS: ./flatFS -f test (create a directory named test to mount 
 
 NOTE: Please ignore errors shown in the Mounted directory(test) while executing commands (Example: while executing touch command it may show some error but it is from the HFS - just ignore it). Only consider error log in terminal where you run the FlatFS. This terminal will also show some log info.
 
-To Test Performance:
+To Test Performance: for 5000 files
 
 Run the below code to measure create performance:
 
