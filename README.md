@@ -18,11 +18,11 @@ Run the below code to measure create performance:
 
 /usr/bin/time -f "\n\nProcess Time : %e\n" touch 'a:b'
 
-Run the below code to measure read performance:
-
-/usr/bin/time -f "\n\nProcess Time : %e\n" ls ?
-
 Run the below code to measure update performance:
 
 /usr/bin/time -f "\n\nProcess Time : %e\n" mv 'a:b' '<c:d'
+
+Run the below code to measure read performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls ?
 
