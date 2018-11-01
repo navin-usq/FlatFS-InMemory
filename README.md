@@ -28,7 +28,7 @@ Run the below code to measure update performance:
 
 To test these features you should comment below performance code
 
-comment the code from 237 to 255 FlatFs.cpp and then compile and run flatfs then open the mounted directory in terminal
+comment the code from 237 to 255 and 425 to 445 in FlatFs.cpp and then compile and run flatfs then open the mounted directory in terminal
 
 Features Implemented: (Open the Mounted Directory - "test" in Terminal and execute the commands)
 
