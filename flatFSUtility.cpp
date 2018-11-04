@@ -1,6 +1,6 @@
 
-char inMemoryKey[10024][24];
-char inMemoryValue[10024][24];
+char inMemoryKey[5500][100];
+char inMemoryValue[5500][100];
 int inMemoryLength = 0;
 
 //find files in the database
@@ -139,17 +139,119 @@ static int findFiles(const char *path, int isQuerySpec, int isFileExist)
 				}
 				if(iterationCount == comlimit && isQuerySpec == 1 && isFileExist == 0) // save file in a array if it is a query spec
 				{
-					strncpy(fileNumsForMove[fileNumsForMoveCount], files[i] , 24);
+					strncpy(fileNumsForMove[fileNumsForMoveCount], files[i] , 100);
 					fileNumsForMoveCount++;
 				}
 				else if(iterationCount == comlimit && isQuerySpec == 0 && isFileExist == 0) // save file in a array if it is not a query spec
 				{
-					strncpy(fileNumsForMove[fileNumsForMoveCount], files[i] , 24);
+					strncpy(fileNumsForMove[fileNumsForMoveCount], files[i] , 100);
 				}
 				inMemoryLength = 0;
 			}
 
 			return 0;
+
+			/*for(int j=0; j<countglobal; ++j) //free memory for the struct s object
+			{
+				free(s.argv1[j]);
+				s.argv1[j] = NULL;
+				free(s.argv2[j]);
+				s.argv2[j] = NULL;
+				free(s.argv3[j]);
+				s.argv3[j] = NULL;
+			}
+
+			countglobal = 0;
+
+			clock_t begin,end;
+			double time_spent;
+
+			begin = clock();
+
+			sqlite3 *db;
+	    char *err_msg = 0;
+
+			int rc; //database connectivity
+			if (FILE *file = fopen(dataBaseLocation, "r"))
+			{
+					fclose(file);
+					rc = sqlite3_open(dataBaseLocation, &db);
+			}
+
+			if (rc != SQLITE_OK) //check connection to database
+			{
+				sqlite3_close(db);
+				return 0;
+			}
+			char *sql;
+
+	    sql = "SELECT * FROM DataForFiles"; //query to select all data
+
+	    rc = sqlite3_exec(db, sql, callback, 0, &err_msg); //perform execution of query
+
+			end = clock();
+			time_spent = (double)(end-begin);
+
+			std::cout << "\nsql time: " << time_spent << "\n";
+
+			if (rc != SQLITE_OK ) //check execution
+			{
+	      sqlite3_free(err_msg);
+	      sqlite3_close(db);
+				if(isFileExist)
+					return 0;
+	      return 1;
+	    }
+	    else
+			{
+		  	int iterationCount = 0;
+				char *fileName;
+				int countfileNames = 0;
+				int n=0;
+				int iteration = 0;
+				int recordlocation = 0;
+				int keyValuePairCount = 0;
+
+				for(int jj=0; jj<totalfiles; jj++) //compare key,value pairs with database values
+				{
+					for(int ii=0; ii<countglobal; ii++)
+					{
+						if(strcmp(files[jj], s.argv1[ii]) == 0)
+						{
+							keyValuePairCount++;
+							for(int ij = 0; ij < comlimit; ij++)
+							{
+								if((strcmp(keyPath[ij],s.argv2[ii]) == 0) && (strcmp(valuePath[ij],s.argv3[ii]) == 0))
+								{
+									iterationCount++;
+								}
+							}
+						}
+					}
+						//print start
+					if(iterationCount == comlimit && isQuerySpec == 0 &&
+					keyValuePairCount == comlimit && isFileExist == 1) //file exist in database if condition is true
+					{
+						return 1;
+					}
+					if(iterationCount == comlimit && isQuerySpec == 1 && isFileExist == 0) // save file in a array if it is a query spec
+					{
+						strncpy(fileNumsForMove[fileNumsForMoveCount], files[jj] , 24);
+						fileNumsForMoveCount++;
+					}
+					else if(iterationCount == comlimit && isQuerySpec == 0 &&
+					keyValuePairCount == comlimit && isFileExist == 0) // save file toarray if it is a add spec
+					{
+						strncpy(fileNumsForMove[fileNumsForMoveCount], files[jj] , 24);
+					}
+					iterationCount = 0;
+					keyValuePairCount = 0;
+						//print end
+				}
+			}
+
+		sqlite3_close(db); // terminate database connection*/
+		return 0;
 }
 
 //get each file name for query spec
@@ -164,7 +266,7 @@ static int getFileNameForQuerySpec(int pathId)
 	{
 		if(strcmp(fileNumsForMove[pathId], files[i]) == 0)
 		{
-			strncpy(querySpecFileName, fileWithNames[i], 24);
+			strncpy(querySpecFileName, fileWithNames[i], 100);
 		}
 	}
 }
@@ -172,7 +274,7 @@ static int getFileNameForQuerySpec(int pathId)
 //check file already exist for add spec
 static int checkFileExistForAddSpec(const char *oldpath, const char *newpath, int pathId)
 {
-	char compareName[24];
+	char compareName[100];
 	int len = 0;
 	compareName[len] = '/';
 	len++;
@@ -199,7 +301,7 @@ static int checkFileExistForAddSpec(const char *oldpath, const char *newpath, in
 	{
 		if(strcmp(files[i], fileNumsForMove[pathId]) == 0)
 		{
-			strncpy(fileWithNames[i], compareName, 24);
+			strncpy(fileWithNames[i], compareName, 100);
 			break;
 		}
 	}
@@ -351,7 +453,7 @@ static int checkSpecExistForAddSpec(const char *oldpath, const char *newpath)
 	}
 	pathLimit = splitKeyValuePairLimit;
 
-	char trimNewPath[24];
+	char trimNewPath[100];
 	int we=0;
 	trimNewPath[we] = '/';
 	we++;
@@ -431,7 +533,7 @@ static int checkFileExistForDeleteSpec(const char *path, const char *deletePath,
 	char **keyPath;
 	char **valuePath;
 	int pathLimit;
-	char pathToSend[24];
+	char pathToSend[100];
 	char **keyPathDelete;
 	char **valuePathDelete;
 	int pathDeleteLimit;
@@ -558,7 +660,7 @@ static int checkFileExistForDeleteSpec(const char *path, const char *deletePath,
 	else
 	{
 		iterationCount = 0;
-		char newPath[24];
+		char newPath[100];
 		int newSpecLimit = 0;
 
 		newPath[newSpecLimit] = '/';
@@ -615,7 +717,7 @@ static int checkFileExistForDeleteSpec(const char *path, const char *deletePath,
 		{
 			if(strcmp(files[i], fileNumsForMove[pathId]) == 0)
 			{
-				strncpy(fileWithNames[i], newPath, 24);
+				strncpy(fileWithNames[i], newPath, 100);
 				break;
 			}
 		}
@@ -627,9 +729,9 @@ static int checkFileExistForDeleteSpec(const char *path, const char *deletePath,
 //add or delete file spec
 static int addOrDeleteFileSpec(const char *path, int isDeleteSpec, int pathId)
 {
-	char fileName[24];//initialize variables
-	char attr[24];
-	char val[24];
+	char fileName[100];//initialize variables
+	char attr[100];
+	char val[100];
 	int n=0,l=0,fileNum;
 	for(int i=2; i<strlen(path); i++) //count key,value pairs to add or delete
 	{
