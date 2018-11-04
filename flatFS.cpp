@@ -19,14 +19,14 @@
 #include "flatFSPassThrough.cpp"
 
 //store database location
-char dataBaseLocation[24];
+char dataBaseLocation[100];
 
 //varaiables for flatFs logic
 void *file_buffer;
 size_t file_size;
-char files[10024][24];
-int fileNums[10024];
-char fileWithNames[10024][24];
+char files[5500][100];
+int fileNums[5500];
+char fileWithNames[5500][100];
 int num = 1;
 int totalfilenums = 0;
 int totalfiles = 0;
@@ -36,9 +36,9 @@ int fileReadCount = 0;
 int isFileFromCreate = 0;
 
 //arrays and integers for spliting the input string into key value pairs
-char fileNumsForMove[10024][24];
+char fileNumsForMove[5500][100];
 int fileNumsForMoveCount = 0;
-char querySpecFileName[24];
+char querySpecFileName[100];
 int splitKeyValuePairLimit = 0;
 char **splitKeyPath;
 char **splitValuePath;
@@ -50,7 +50,11 @@ struct my_struct s;
 int file10000 = 0;
 int fileRename10000 = 0;
 int four = 0;
-char inMemoryNames[10024][24];
+int fourRename = 0;
+char inMemoryNames[5500][100];
+
+int createRecordsForPerformance(mode_t mode, struct fuse_file_info *fi);
+int updateRecordsForPerformance();
 
 //Method to know what kind of command user has specified
 static int do_getattr( const char *path, struct stat *st )
@@ -122,11 +126,295 @@ static int do_readdir( const char *path, void *buffer, fuse_fill_dir_t filler, o
 			}
 		}
 		fileNumsForMoveCount = 0;
+		//pointers for key and value pairs
+		/*char **keyPath;
+		char **valuePath;
+		int searchCount = 1;
+
+		for(int ii = 0; path[ii] != NULL; ii++) //count number of key value pairs
+		{
+			if(path[ii] == ',')
+					searchCount++;
+		}
+
+		//dynamic memory allocation for the lenght of key value pairs
+		keyPath = (char**)malloc((searchCount + 1) * sizeof(char*));
+		valuePath = (char**)malloc((searchCount + 1) * sizeof(char*));
+
+		//variables to count each key and value length
+		int keylimit = 0;
+		int vallimit = 0;
+		int comlimit = 0;
+		int valRegion = 0;
+		int nSize = 0;
+
+		for(int ii = 2; ii < strlen(path); ii++) //memory allocation for each key and value
+		{
+			if(path[ii] == ':')
+			{
+				keyPath[comlimit] = (char*)malloc(nSize);
+				nSize = 0;
+				valRegion = 1;
+			}
+			else if(path[ii] == ',' || path[ii + 1] == NULL)
+			{
+				if(path[ii + 1] == NULL)
+					nSize++;
+				valuePath[comlimit] = (char*)malloc(nSize);
+				nSize = 0;
+				valRegion = 0;
+				comlimit++;
+			}
+			if(path[ii] != ':' && path[ii] != ',')
+			{
+				nSize++;
+			}
+		}
+
+		comlimit = 0;
+
+		for(int ii = 2; ii < strlen(path); ii++) //saving key and values in array
+		{
+			if(path[ii] == ':')
+			{
+				valRegion = 1;
+				keyPath[comlimit][keylimit] = NULL;
+				keylimit = 0;
+			}
+			else if(path[ii] == ',')
+			{
+				valRegion = 0;
+				valuePath[comlimit][vallimit] = NULL;
+				comlimit++;
+				vallimit = 0;
+			}
+			if((path[ii] != ':' && path[ii] != ',') && valRegion == 0)
+			{
+				keyPath[comlimit][keylimit] = path[ii];
+				keylimit++;
+			}
+			else if((path[ii] != ':' && path[ii] != ',') && valRegion == 1)
+			{
+				valuePath[comlimit][vallimit] = path[ii];
+				vallimit++;
+			}
+		}
+
+		valuePath[comlimit][vallimit] = NULL;
+		comlimit++;
+
+		for(int j=0; j<countglobal; ++j) //free struc object memory for getting information from database
+		{
+			free(s.argv1[j]);
+			s.argv1[j] = NULL;
+			free(s.argv2[j]);
+			s.argv2[j] = NULL;
+			free(s.argv3[j]);
+			s.argv3[j] = NULL;
+		}
+
+		countglobal = 0;
+
+		sqlite3 *db;
+	  char *err_msg = 0;
+
+	  int rc; //opening database
+		if (FILE *file = fopen(dataBaseLocation, "r"))
+		{
+        fclose(file);
+				rc = sqlite3_open(dataBaseLocation, &db);
+    }
+
+		if (rc != SQLITE_OK) //checking databse exist
+		{
+			std::cout << "open:error_file\n";
+			sqlite3_close(db);
+	    return 0;
+	  }
+		char *sql;
+	  sql = "SELECT * FROM DataForFiles"; //query to select all key value pair records
+	  rc = sqlite3_exec(db, sql, callback, 0, &err_msg); //database call
+
+		if (rc != SQLITE_OK ) //checking query execution
+		{
+			std::cout << "open:error_data_file\n";
+	    sqlite3_close(db);
+	    return 0;
+	  }
+	  else
+		{
+			int iterationCount = 0;
+			char *fileName;
+			int countfileNames = 0;
+			int n=0;
+			int iteration = 0;
+			int recordlocation = 0;
+
+			for(int jj=0; jj<totalfiles; jj++) //comparing database key,value pair with the user input
+			{
+				for(int ii=0; ii<countglobal; ii++)
+				{
+					if(strcmp(files[jj], s.argv1[ii]) == 0)
+					{
+						for(int ij = 0; ij < comlimit; ij++)
+						{
+							if((strcmp(keyPath[ij],s.argv2[ii]) == 0) && (strcmp(valuePath[ij],s.argv3[ii]) == 0))
+							{
+								iterationCount++;
+							}
+						}
+					}
+				}
+				//print start
+				if(iterationCount == comlimit) //getting actual files for the search based on comparison result
+				{
+					for(int ii=0; ii<countglobal; ii++)
+					{
+						if(strcmp(files[jj], s.argv1[ii]) == 0)
+						{
+							n = n + strlen(s.argv2[ii]) + strlen(s.argv3[ii]) + 3;
+							iteration++;
+						}
+					}
+					fileName = (char*)malloc(n);
+					int x = 0;
+					for(int qq=0; qq<countglobal; qq++)
+					{
+						if(strcmp(files[jj], s.argv1[qq]) == 0)
+						{
+							if(x != 0)
+							{
+								fileName[x] = ',';
+								x++;
+							}
+							for(int y=0; y<strlen(s.argv2[qq]); y++,x++)
+							{
+								fileName[x] = s.argv2[qq][y];
+							}
+							fileName[x] = ':';
+							x++;
+							for(int y=0; y<strlen(s.argv3[qq]); y++,x++)
+							{
+								fileName[x] = s.argv3[qq][y];
+							}
+						}
+					}
+					fileName[x] = NULL;
+					isFile = 1;
+					filler(buffer, fileName, NULL, 0); //printing the file name to the buffer
+					recordlocation = recordlocation + iteration;
+					iteration = 0;
+					free(fileName);
+					fileName = NULL;
+					//print end
+				}
+				iterationCount = 0;
+			}
+		}
+
+		sqlite3_close(db); // closiing database*/
 
 		return 0;
 	}
 	else if(file_type(path) == FILE_ROOT || file_type(path) == FILE_LIST) //to list all files in the directory
 	{
+		/*for(int j=0; j<countglobal; ++j) //free memory for database key,value pairs
+		{
+			free(s.argv1[j]);
+			s.argv1[j] = NULL;
+			free(s.argv2[j]);
+			s.argv2[j] = NULL;
+			free(s.argv3[j]);
+			s.argv3[j] = NULL;
+		}
+
+		countglobal = 0;
+
+		sqlite3 *db;
+    char *err_msg = 0;
+
+    int rc;
+		//opening database connection
+		if (FILE *file = fopen(dataBaseLocation, "r"))
+		{
+        fclose(file);
+				rc = sqlite3_open(dataBaseLocation, &db);
+    }
+
+    if (rc != SQLITE_OK) //checking databse connection
+		{
+				std::cout << "open:error\n";
+        return 0;
+    }
+
+		char *sql;
+    sql = "SELECT * FROM DataForFiles"; //selecting key value pairs
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg); //database operations
+
+    if (rc != SQLITE_OK ) //checking databse results
+		{
+    		sqlite3_close(db);
+      	return 0;
+    }
+    else
+		{
+				char *fileName;
+				int countfileNames = 0;
+				int n=0;
+				int iteration = 0;
+				int recordlocation = 0;
+
+				for(int jj=0; jj<totalfiles; jj++) //locating all key value pairs
+				{
+					for(int ii=0; ii<countglobal; ii++)
+					{
+						if(strcmp(files[jj], s.argv1[ii]) == 0)
+						{
+							n = n + strlen(s.argv2[ii]) + strlen(s.argv3[ii]) + 3;
+							iteration++;
+						}
+					}
+					fileName = (char*)malloc(n);
+
+					int x = 0;
+					for(int qq=0; qq<countglobal; qq++)
+					{
+						if(strcmp(files[jj], s.argv1[qq]) == 0)
+						{
+							if(x != 0)
+							{
+								fileName[x] = ',';
+								x++;
+							}
+							for(int y=0; y<strlen(s.argv2[qq]); y++,x++)
+							{
+								fileName[x] = s.argv2[qq][y];
+							}
+							fileName[x] = ':';
+							x++;
+							for(int y=0; y<strlen(s.argv3[qq]); y++,x++)
+							{
+								fileName[x] = s.argv3[qq][y];
+							}
+						}
+					}
+					fileName[x] = NULL;
+					isFile = 1;
+					filler(buffer, fileName, NULL, 0); //printing key values pairs using buffer
+					recordlocation = recordlocation + iteration;
+					iteration = 0;
+					free(fileName);
+					fileName = NULL;
+				}
+
+			}
+
+			sqlite3_close(db); //close database connection*/
+
+			/*for(int ii=0; ii<totalfiles; ii++)
+			{
+				std::cout<< "\nname: " << fileWithNames[ii] << "\n";
+			}*/
 
 			for(int r=0; r<totalfiles; r++)
 			{isFile = 1;
@@ -147,8 +435,8 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 
 	begin_m = clock();*/
 
-	char compareName[24];
-	strncpy(compareName, path , 24);
+	char compareName[100];
+	strncpy(compareName, path , 100);
 
 	if(findFiles(path, 0, 1) == 1) // check already file exist
 	{
@@ -163,7 +451,7 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 		}
 	}*/
 
-		char fname[24];
+		char fname[100];
 		int x=0;
 		for(int w=1;path[w]!=NULL;w++)
 		{
@@ -171,10 +459,10 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 			x++;
 		}
 			fname[x] = NULL;
-		strncpy(inMemoryNames[totalfiles], fname, 24);
+		strncpy(inMemoryNames[totalfiles], fname, 100);
 
-	strncpy(fileWithNames[totalfiles], path , 24);
-	char fileName[24];
+	strncpy(fileWithNames[totalfiles], path , 100);
+	char fileName[100];
 	int n=0,l=0,fileNum;
 	totalfiles++;
 
@@ -185,7 +473,7 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 
 	static int file_counter = 0;
 	int res;
-	if(file_counter >= 10024)
+	if(file_counter >= 5500)
 	{
 		return -ENOSPC;
 	}
@@ -231,28 +519,10 @@ static int do_create (const char *path, mode_t mode, struct fuse_file_info *fi )
 	}
 	fileName[u] = '\0';
 	//
-	strncpy(files[file_counter], fileName , 24);
+	strncpy(files[file_counter], fileName , 100);
 	file_counter++;
 
-	if(file10000 <= 4999)
-	{
-			file10000++;
-			char test[24];
-			char *random = gen_random(test, 5);
-			char fileCreate[24] = "/name:";
-
-			int re = 6;
-			for(int rr=0; rr<strlen(random); rr++)
-			{
-				fileCreate[re] = random[rr];
-				re++;
-			}
-			fileCreate[re] = NULL;
-
-			std::cout << "\n" << fileCreate << "\n";
-
-			do_create(fileCreate,mode,fi);
-	}
+	createRecordsForPerformance(mode, fi);
 
 	if(isFileFromCreate == 0) //check if it is a file create
 		isFileFromCreate = 1;
@@ -273,8 +543,6 @@ static int do_rename (const char *path1, const char *path2)
 	}
 	else if(path1[1] == '?' && path2[1] == '+') //if it is query spec and a add spec
 	{
-	std::cout << "syantax error";
-	return 0;
 		findFiles(path1, 1, 0);//check file exist
 		if(fileNumsForMove[0][0] == NULL)
 		{
@@ -310,8 +578,6 @@ static int do_rename (const char *path1, const char *path2)
 	}
 	else if(path1[1] == '?' && path2[1] == '_') //if it is a query spec and a delete spec
 	{
-std::cout << "syantax error";
-	return 0;
 		findFiles(path1, 1, 0); //check file exist
 		if(fileNumsForMove[0][0] == NULL)
 		{
@@ -352,7 +618,7 @@ std::cout << "syantax error";
 	}
 	else if(path1[1] != NULL && path2[1] == '<') //if it is a file speac and a replace spec
 	{
-		char pathToCheck[24];
+		char pathToCheck[100];
 		int qw = 0;
 		pathToCheck[qw] = '/';
 		qw++;
@@ -385,8 +651,21 @@ std::cout << "syantax error";
 			else
 			{
 				//char pathToDelete[24];
-				char pathToAdd[24];
-
+				char pathToAdd[100];
+				/*qw = 0;
+				pathToDelete[qw] = '/';
+				qw++;
+				pathToDelete[qw] = '_';
+				qw++;
+				for(int i=1; path1[i]!=NULL; i++)
+				{
+					pathToDelete[qw] = path1[i];
+					qw++;
+				}
+				pathToDelete[qw] = '/';
+				qw++;
+				pathToDelete[qw] = NULL;
+				qw++;*/
 				qw=0;
 				pathToAdd[qw] = '/';
 				qw++;
@@ -397,7 +676,7 @@ std::cout << "syantax error";
 				}
 				pathToAdd[qw] = NULL;
 
-				char fname[24];
+				char fname[100];
 				int x=0;
 				for(int w=2;path2[w]!='/';w++)
 				{
@@ -411,8 +690,8 @@ std::cout << "syantax error";
 				{
 					if(strcmp(files[i], fileNumsForMove[fileNumsForMoveCount]) == 0)
 					{
-						strncpy(fileWithNames[i], pathToAdd, 24);
-						strncpy(inMemoryNames[i], fname, 24);
+						strncpy(fileWithNames[i], pathToAdd, 100);
+						strncpy(inMemoryNames[i], fname, 100);
 						break;
 					}
 				} //modifiy file based on the new spec
@@ -422,33 +701,13 @@ std::cout << "syantax error";
 				{
 					fileNumsForMove[fileNumsForMoveCount][kk] = NULL;
 				}
-				if(fileRename10000 <= 4999)
-				{std::cout<< "inn";
-					fileRename10000++;
-					char test[24];
-					char *random = gen_random(test, 5);
-					char fileCreate[24] = "/<nam:";
-					int re = 6;
-					for(int rr=0; rr<strlen(random); rr++)
-					{
-						fileCreate[re] = random[rr];
-						re++;
-					}
-					fileCreate[re] = '/';
-					re++;
-					fileCreate[re] = NULL;
 
-					std::cout << "\n" << fileWithNames[fileRename10000] << " " << fileCreate << "\n";
-	
-					do_rename(fileWithNames[fileRename10000],fileCreate);
-				}
+				updateRecordsForPerformance();
 			}
 		}
 	}
 	else if(path1[1] != NULL && path2[1] == '+') //if it is a file spec and a add spec
 	{
-std::cout << "syantax error";
-	return 0;
 		findFiles(path1, 0, 0); //check file exist
 		if(fileNumsForMove[fileNumsForMoveCount][0] == NULL)
 		{
@@ -473,8 +732,6 @@ std::cout << "syantax error";
 	}
 	else if(path1[1] != NULL && path2[1] == '_') //if it is a file spec and a delete spec
 	{
-std::cout << "syantax error";
-	return 0;
 		findFiles(path1, 0, 0); //check file exist
 		if(fileNumsForMove[fileNumsForMoveCount][0] == NULL)
 		{
@@ -507,6 +764,401 @@ std::cout << "syantax error";
 	}
 
 	return 0;
+}
+
+int createRecordsForPerformance(mode_t mode, struct fuse_file_info *fi)
+{
+	if(file10000 < 4999)
+	{
+			int i = file10000 + (499 * four);
+			char test[100];
+			char *random = gen_random(test, 5);
+			char fileCreate[100];
+
+			int re;
+			//std::cout << "\nnum:" << " " << i;
+//1
+			if(i < 100)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit1,change:change1,version:version1,requirement:requirement1,name:", 100);
+				re = 84;
+			}
+			else if(i < 200)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 84;
+			}
+			else if(i < 400)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit1,change:change1,version:version2,name:", 100);
+				re = 59;
+			}
+			else if(i < 600)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit1,change:change2,name:", 100);
+				re = 42;
+			}
+			else if(i < 800)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit2,name:", 100);
+				re = 27;
+			}
+			else if(i < 1000)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit3,name:", 100);
+				re = 27;
+			}
+//2
+			else if(i < 1100)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit1,change:change1,version:version1,requirement:requirement1,name:", 100);
+				re = 84;
+			}
+			else if(i < 1200)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 84;
+			}
+			else if(i < 1400)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit1,change:change1,version:version2,name:", 100);
+				re = 59;
+			}
+			else if(i < 1600)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit1,change:change2,name:", 100);
+				re = 42;
+			}
+			else if(i < 1800)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit2,name:", 100);
+				re = 27;
+			}
+			else if(i < 2000)
+			{
+				strncpy(fileCreate, "/year:2011,unit:unit3,name:", 100);
+				re = 27;
+			}
+
+//3
+			else if(i < 2100)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit1,change:change1,version:version1,requirement:requirement1,name:", 100);
+				re = 84;
+			}
+			else if(i < 2200)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 84;
+			}
+			else if(i < 2400)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit1,change:change1,version:version2,name:", 100);
+				re = 59;
+			}
+			else if(i < 2600)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit1,change:change2,name:", 100);
+				re = 42;
+			}
+			else if(i < 2800)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit2,name:", 100);
+				re = 27;
+			}
+			else if(i < 3000)
+			{
+				strncpy(fileCreate, "/year:2012,unit:unit3,name:", 100);
+				re = 27;
+			}
+
+//4
+			else if(i < 3100)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit1,change:change1,version:version1,requirement:requirement1,name:", 100);
+				re = 84;
+			}
+			else if(i < 3200)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 84;
+			}
+			else if(i < 3400)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit1,change:change1,version:version2,name:", 100);
+				re = 59;
+			}
+			else if(i < 3600)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit1,change:change2,name:", 100);
+				re = 42;
+			}
+			else if(i < 3800)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit2,name:", 100);
+				re = 27;
+			}
+			else if(i < 4000)
+			{
+				strncpy(fileCreate, "/year:2013,unit:unit3,name:", 100);
+				re = 27;
+			}
+
+
+//5
+			else if(i < 4100)
+			{
+				strncpy(fileCreate, "/year:2014,unit:unit1,change:change1,version:version1,requirement:requirement1,name:", 100);
+				re = 84;
+			}
+			else if(i < 4200)
+			{
+				strncpy(fileCreate, "/year:2014,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 84;
+			}
+			else if(i < 4400)
+			{
+				strncpy(fileCreate, "/year:2010,unit:unit1,change:change1,version:version2,name:", 100);
+				re = 59;
+			}
+			else if(i < 4600)
+			{
+				strncpy(fileCreate, "/year:2014,unit:unit1,change:change2,name:", 100);
+				re = 42;
+			}
+			else if(i < 4800)
+			{
+				strncpy(fileCreate, "/year:2014,unit:unit2,name:", 100);
+				re = 27;
+			}
+			else
+			{
+				strncpy(fileCreate, "/year:2014,unit:unit3,name:", 100);
+				re = 27;
+			}
+
+
+for(int rr=0; rr<strlen(random); rr++)
+			{
+				fileCreate[re] = random[rr];
+				re++;
+			}
+			fileCreate[re] = NULL;
+
+			std::cout << "\n" << fileCreate << "\n";
+file10000++;
+			do_create(fileCreate,mode,fi);
+
+}
+/*else
+	{
+		if(four <= 8)
+		{
+			file10000 = 0;
+		}
+		four++;
+	}*/
+
+return 0;
+}
+
+int updateRecordsForPerformance()
+{
+		if(fileRename10000 < 4999)
+				{
+
+			int i = fileRename10000 + (499 * fourRename);
+			char test[100];
+			char *random = gen_random(test, 5);
+			char fileCreate[100];
+
+			int re;
+			//std::cout << "\nnum:" << i;
+//1
+			if(i < 100)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
+				re = 84;
+			}
+			else if(i < 200)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
+				re = 84;
+			}
+			else if(i < 400)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version2,nam:", 100);
+				re = 59;
+			}
+			else if(i < 600)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change2,nam:", 100);
+				re = 42;
+			}
+			else if(i < 800)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit2,nam:", 100);
+				re = 27;
+			}
+			else if(i < 1000)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit3,nam:", 100);
+				re = 27;
+			}
+
+//2
+			else if(i < 1100)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
+				re = 84;
+			}
+			else if(i < 1200)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
+				re = 84;
+			}
+			else if(i < 1400)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version2,nam:", 100);
+				re = 59;
+			}
+			else if(i < 1600)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change2,nam:", 100);
+				re = 42;
+			}
+			else if(i < 1800)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit2,nam:", 100);
+				re = 27;
+			}
+			else if(i < 2000)
+			{
+				strncpy(fileCreate, "/<year:2011,unit:unit3,nam:", 100);
+				re = 27;
+			}
+
+//3
+			else if(i < 2100)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
+				re = 84;
+			}
+			else if(i < 2200)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
+				re = 84;
+			}
+			else if(i < 2400)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version2,nam:", 100);
+				re = 59;
+			}
+			else if(i < 2600)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change2,nam:", 100);
+				re = 42;
+			}
+			else if(i < 2800)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit2,nam:", 100);
+				re = 27;
+			}
+			else if(i < 3000)
+			{
+				strncpy(fileCreate, "/<year:2012,unit:unit3,nam:", 100);
+				re = 27;
+			}
+
+//4
+			else if(i < 3100)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
+				re = 84;
+			}
+			else if(i < 3200)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
+				re = 84;
+			}
+			else if(i < 3400)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version2,nam:", 100);
+				re = 59;
+			}
+			else if(i < 3600)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change2,nam:", 100);
+				re = 42;
+			}
+			else if(i < 3800)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit2,nam:", 100);
+				re = 27;
+			}
+			else if(i < 4000)
+			{
+				strncpy(fileCreate, "/<year:2013,unit:unit3,nam:", 100);
+				re = 27;
+			}
+
+
+//5
+			else if(i < 4100)
+			{
+				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
+				re = 84;
+			}
+			else if(i < 4200)
+			{
+				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
+				re = 84;
+			}
+			else if(i < 4400)
+			{
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version2,nam:", 100);
+				re = 59;
+			}
+			else if(i < 4600)
+			{
+				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change2,nam:", 100);
+				re = 42;
+			}
+			else if(i < 4800)
+			{
+				strncpy(fileCreate, "/<year:2014,unit:unit2,nam:", 100);
+				re = 27;
+			}
+			else
+			{
+				strncpy(fileCreate, "/<year:2014,unit:unit3,nam:", 100);
+				re = 27;
+			}
+
+
+for(int rr=0; rr<strlen(random); rr++)
+			{
+				fileCreate[re] = random[rr];
+				re++;
+			}
+			fileCreate[re] = '/';
+			re++;
+			fileCreate[re] = NULL;
+
+			std::cout << "\nNew Name: " << fileCreate << "\n";
+std::cout << "\nOld Name: " << fileWithNames[i] << "\n";
+fileRename10000++;
+			do_rename(fileWithNames[i],fileCreate);
+				}
+
+/*else
+	{
+		if(fourRename <= 8)
+		{
+			fileRename10000 = 0;
+		}
+		fourRename++;
+	}*/
 }
 
 int main( int argc, char *argv[] )
