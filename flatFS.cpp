@@ -417,7 +417,7 @@ static int do_readdir( const char *path, void *buffer, fuse_fill_dir_t filler, o
 			}*/
 
 			for(int r=0; r<totalfiles; r++)
-			{isFile = 1;
+			{
 				filler(buffer, inMemoryNames[r], NULL, 0);
 			}
 
