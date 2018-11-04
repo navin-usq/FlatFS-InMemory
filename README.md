@@ -12,17 +12,29 @@ command to run FlatFS: ./flatFS -f test (create a directory named test to mount 
 
 NOTE: Please ignore errors shown in the Mounted directory(test) while executing commands (Example: while executing touch command it may show some error but it is from the HFS - just ignore it). Only consider error log in terminal where you run the FlatFS. This terminal will also show some log info.
 
-To Test Performance: for 5000 files
+To Test Performance: for 5000 files (Note: This module is only to test performance of Flatfs. Please do not try any other scenario other than below commands)
 
 Run the below code to measure create performance:
 
-/usr/bin/time -f "\n\nProcess Time : %e\n" touch 'a:b'
+/usr/bin/time -f "\n\nProcess Time : %e\n" touch 'create:value1'
+
+Run the below code to measure read performance (reading 5000 files):
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls '?'
+
+Run the below code to measure search performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls '?name:zpr7R' (you can enter any file name, I have given a sample file name)
 
 Run the below code to measure update performance:
 
-/usr/bin/time -f "\n\nProcess Time : %e\n" mv 'a:b' '<c:d'
+/usr/bin/time -f "\n\nProcess Time : %e\n" mv 'create:value1' '<rename:newval'
 
-Run the below code to measure read performance:
+Run the below code to measure read performance (reading 5000 files):
 
-/usr/bin/time -f "\n\nProcess Time : %e\n" ls ?
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls '?'
+
+Run the below code to measure search performance:
+
+/usr/bin/time -f "\n\nProcess Time : %e\n" ls '?nam:znHT5'
 
