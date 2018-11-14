@@ -964,10 +964,10 @@ return 0;
 
 int updateRecordsForPerformance()
 {
-		if(fileRename10000 < 4999)
+		if(fileRename10000 < 499)
 				{
 
-			int i = fileRename10000 + (499 * fourRename);
+			int i = fileRename10000 + 1;
 			char test[100];
 			char *random = gen_random(test, 5);
 			char fileCreate[100];
@@ -975,166 +975,11 @@ int updateRecordsForPerformance()
 			int re;
 			//std::cout << "\nnum:" << i;
 //1
-			if(i < 100)
+			//if(i < 500)
 			{
-				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
-				re = 84;
+				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version1,requirement:requirement2,name:", 100);
+				re = 85;
 			}
-			else if(i < 200)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
-				re = 84;
-			}
-			else if(i < 400)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version2,nam:", 100);
-				re = 59;
-			}
-			else if(i < 600)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change2,nam:", 100);
-				re = 42;
-			}
-			else if(i < 800)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit2,nam:", 100);
-				re = 27;
-			}
-			else if(i < 1000)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit3,nam:", 100);
-				re = 27;
-			}
-
-//2
-			else if(i < 1100)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
-				re = 84;
-			}
-			else if(i < 1200)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
-				re = 84;
-			}
-			else if(i < 1400)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change1,version:version2,nam:", 100);
-				re = 59;
-			}
-			else if(i < 1600)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit1,change:change2,nam:", 100);
-				re = 42;
-			}
-			else if(i < 1800)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit2,nam:", 100);
-				re = 27;
-			}
-			else if(i < 2000)
-			{
-				strncpy(fileCreate, "/<year:2011,unit:unit3,nam:", 100);
-				re = 27;
-			}
-
-//3
-			else if(i < 2100)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
-				re = 84;
-			}
-			else if(i < 2200)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
-				re = 84;
-			}
-			else if(i < 2400)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change1,version:version2,nam:", 100);
-				re = 59;
-			}
-			else if(i < 2600)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit1,change:change2,nam:", 100);
-				re = 42;
-			}
-			else if(i < 2800)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit2,nam:", 100);
-				re = 27;
-			}
-			else if(i < 3000)
-			{
-				strncpy(fileCreate, "/<year:2012,unit:unit3,nam:", 100);
-				re = 27;
-			}
-
-//4
-			else if(i < 3100)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
-				re = 84;
-			}
-			else if(i < 3200)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
-				re = 84;
-			}
-			else if(i < 3400)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change1,version:version2,nam:", 100);
-				re = 59;
-			}
-			else if(i < 3600)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit1,change:change2,nam:", 100);
-				re = 42;
-			}
-			else if(i < 3800)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit2,nam:", 100);
-				re = 27;
-			}
-			else if(i < 4000)
-			{
-				strncpy(fileCreate, "/<year:2013,unit:unit3,nam:", 100);
-				re = 27;
-			}
-
-
-//5
-			else if(i < 4100)
-			{
-				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change1,version:version1,requirement:requirement1,nam:", 100);
-				re = 84;
-			}
-			else if(i < 4200)
-			{
-				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change1,version:version1,requirement:requirement2,nam:", 100);
-				re = 84;
-			}
-			else if(i < 4400)
-			{
-				strncpy(fileCreate, "/<year:2010,unit:unit1,change:change1,version:version2,nam:", 100);
-				re = 59;
-			}
-			else if(i < 4600)
-			{
-				strncpy(fileCreate, "/<year:2014,unit:unit1,change:change2,nam:", 100);
-				re = 42;
-			}
-			else if(i < 4800)
-			{
-				strncpy(fileCreate, "/<year:2014,unit:unit2,nam:", 100);
-				re = 27;
-			}
-			else
-			{
-				strncpy(fileCreate, "/<year:2014,unit:unit3,nam:", 100);
-				re = 27;
-			}
-
 
 for(int rr=0; rr<strlen(random); rr++)
 			{
