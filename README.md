@@ -34,7 +34,4 @@ Run the below code to measure read performance (reading 5000 files):
 
 /usr/bin/time -f "\n\nProcess Time : %e\n" ls '?'
 
-Run the below code to measure search performance:
-
-/usr/bin/time -f "\n\nProcess Time : %e\n" ls '?nam:znHT5'
 
